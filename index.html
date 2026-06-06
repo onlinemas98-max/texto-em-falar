@@ -1,0 +1,771 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VozCaster - Texto em Fala Ilimitado</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Inter & Play icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #1e293b;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #475569;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #64748b;
+        }
+    </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col">
+
+    <!-- Header -->
+    <header class="border-b border-slate-800 bg-slate-900/80 backdrop-blur sticky top-0 z-50 px-4 py-4 sm:px-8">
+        <div class="max-w-7xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-4">
+            <div class="flex items-center gap-3">
+                <div class="p-2.5 bg-gradient-to-tr from-violet-600 to-indigo-600 rounded-xl shadow-lg shadow-indigo-500/20">
+                    <i class="fa-solid fa-microphone-lines text-2xl text-white"></i>
+                </div>
+                <div>
+                    <h1 class="text-xl font-bold tracking-tight bg-gradient-to-r from-white via-indigo-200 to-indigo-400 bg-clip-text text-transparent">
+                        VozCaster
+                    </h1>
+                    <p class="text-xs text-slate-400">Texto em Fala Ilimitado e Inteligente</p>
+                </div>
+            </div>
+            
+            <div class="flex items-center gap-4">
+                <span class="flex h-2 w-2 relative">
+                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                    <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                </span>
+                <span class="text-xs text-slate-300 font-medium bg-slate-800/80 px-3 py-1.5 rounded-full border border-slate-700">
+                    Gemini Neural Audio Engine
+                </span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content Grid -->
+    <main class="flex-grow max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8 grid grid-cols-1 lg:grid-cols-12 gap-8">
+        
+        <!-- Left Panel: Text input and settings (7 cols) -->
+        <section class="lg:col-span-7 flex flex-col gap-6">
+            <!-- Form Area -->
+            <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 sm:p-6 shadow-xl flex flex-col gap-5">
+                <div class="flex justify-between items-center">
+                    <h2 class="text-lg font-semibold flex items-center gap-2 text-indigo-300">
+                        <i class="fa-solid fa-keyboard"></i> Digite ou Cole seu Texto
+                    </h2>
+                    <span id="char-counter" class="text-xs text-slate-400 bg-slate-950 px-2.5 py-1 rounded-md border border-slate-850">
+                        0 / 5000 caracteres
+                    </span>
+                </div>
+
+                <!-- Textarea -->
+                <div class="relative">
+                    <textarea 
+                        id="tts-input" 
+                        rows="8" 
+                        maxlength="5000"
+                        class="w-full bg-slate-950 border border-slate-800 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 rounded-xl p-4 text-slate-100 placeholder-slate-500 text-sm sm:text-base leading-relaxed transition resize-none outline-none"
+                        placeholder="Insira aqui o texto que você deseja transformar em fala. Para textos mais longos de até 5 minutos (~4000 caracteres), nossa IA dividirá e gerará um arquivo de áudio unificado completo para download ilimitado..."></textarea>
+                    
+                    <button 
+                        id="btn-clear" 
+                        class="absolute bottom-3 right-3 text-xs text-slate-400 hover:text-red-400 transition bg-slate-900 px-2 py-1 rounded border border-slate-800 hover:border-red-500/20 flex items-center gap-1">
+                        <i class="fa-regular fa-trash-can"></i> Limpar
+                    </button>
+                </div>
+
+                <!-- Voice Selection Controls -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-medium text-slate-400 mb-1.5 flex items-center gap-1.5">
+                            <i class="fa-solid fa-circle-user text-indigo-400"></i> Modelo de Voz
+                        </label>
+                        <select 
+                            id="voice-select" 
+                            class="w-full bg-slate-950 border border-slate-800 focus:border-indigo-500 rounded-xl p-3 text-sm text-slate-200 outline-none transition">
+                            <option value="Zephyr" selected>Zephyr (Brilhante, Alta clareza)</option>
+                            <option value="Puck">Puck (Alegre e Dinâmico)</option>
+                            <option value="Charon">Charon (Informativo e Sério)</option>
+                            <option value="Kore">Kore (Firme e Imponente)</option>
+                            <option value="Fenrir">Fenrir (Excitado e Rápido)</option>
+                            <option value="Aoede">Aoede (Calmo e Suave)</option>
+                            <option value="Callirrhoe">Callirrhoe (Espontâneo)</option>
+                            <option value="Despina">Despina (Macio e Acolhedor)</option>
+                            <option value="Erinome">Erinome (Voz Clara e Limpa)</option>
+                            <option value="Algieba">Algieba (Aveludado/Profissional)</option>
+                            <option value="Gacrux">Gacrux (Maduro e Equilibrado)</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-medium text-slate-400 mb-1.5 flex items-center gap-1.5">
+                            <i class="fa-solid fa-wand-magic-sparkles text-indigo-400"></i> Tom da Locução
+                        </label>
+                        <select 
+                            id="tone-select" 
+                            class="w-full bg-slate-950 border border-slate-800 focus:border-indigo-500 rounded-xl p-3 text-sm text-slate-200 outline-none transition">
+                            <option value="Say naturally:">Natural (Padrão)</option>
+                            <option value="Say cheerfully:">Entusiasta e Alegre</option>
+                            <option value="Say in a calm, professional tone:">Calmo e Profissional</option>
+                            <option value="Say seriously and authoritatively:">Sério e Autoritário</option>
+                            <option value="Say in a warm, welcoming whisper:">Sussurro Caloroso</option>
+                            <option value="Say in a mysterious, soft whisper:">Mistério e Suspense</option>
+                            <option value="Say as an energetic radio announcer:">Locutor de Rádio Enérgico</option>
+                            <option value="Say slowly and instructively:">Didático e Pausado</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Convert Button -->
+                <button 
+                    id="btn-generate"
+                    class="w-full py-4 px-6 rounded-xl bg-gradient-to-r from-indigo-600 via-indigo-500 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white font-semibold text-base transition flex items-center justify-center gap-3 shadow-lg shadow-indigo-500/10 hover:shadow-indigo-500/20 active:scale-[0.99]">
+                    <i class="fa-solid fa-wand-magic-sparkles"></i> Gerar Áudio
+                </button>
+            </div>
+
+            <!-- Custom Notification Toaster Container -->
+            <div id="toast-container" class="fixed top-5 right-5 z-50 flex flex-col gap-3 pointer-events-none"></div>
+        </section>
+
+        <!-- Right Panel: Audio player, current track, and History (5 cols) -->
+        <section class="lg:col-span-5 flex flex-col gap-6">
+            
+            <!-- Audio Output & Active Player -->
+            <div class="bg-gradient-to-b from-slate-900 to-slate-950 border border-slate-800 rounded-2xl p-5 sm:p-6 shadow-xl flex flex-col gap-6">
+                <h2 class="text-lg font-semibold flex items-center gap-2 text-violet-400">
+                    <i class="fa-solid fa-volume-high"></i> Player de Áudio
+                </h2>
+
+                <div id="player-placeholder" class="py-12 px-4 border border-dashed border-slate-800 rounded-xl flex flex-col items-center justify-center text-center gap-3">
+                    <div class="w-12 h-12 rounded-full bg-slate-900 flex items-center justify-center border border-slate-800 text-slate-500">
+                        <i class="fa-solid fa-play"></i>
+                    </div>
+                    <div>
+                        <p class="text-sm font-medium text-slate-300">Nenhum áudio gerado ainda</p>
+                        <p class="text-xs text-slate-500 max-w-xs mt-1">Escreva um texto no painel esquerdo e clique em "Gerar Áudio" para escutar e baixar.</p>
+                    </div>
+                </div>
+
+                <!-- Active Audio Player Element (hidden by default) -->
+                <div id="active-player-container" class="hidden flex flex-col gap-5 bg-slate-950/60 border border-slate-850 p-4 rounded-xl">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-lg bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-indigo-400">
+                            <i class="fa-solid fa-file-audio text-xl animate-pulse"></i>
+                        </div>
+                        <div class="overflow-hidden flex-1">
+                            <p id="player-title" class="text-sm font-semibold truncate text-slate-200">fala_gerada.wav</p>
+                            <p id="player-meta" class="text-xs text-slate-500">Voz: Zephyr • Duração: --:--</p>
+                        </div>
+                    </div>
+
+                    <!-- Waveform Animation simulation -->
+                    <div class="h-12 w-full flex items-center justify-center gap-1 px-4 bg-slate-950 rounded-lg border border-slate-900 overflow-hidden">
+                        <!-- Simulated lines of soundwave -->
+                        <span class="wave-bar w-1.5 bg-indigo-500/40 rounded transition-all duration-300 h-1"></span>
+                        <span class="wave-bar w-1.5 bg-indigo-500/40 rounded transition-all duration-300 h-1.5"></span>
+                        <span class="wave-bar w-1.5 bg-indigo-500/60 rounded transition-all duration-300 h-3"></span>
+                        <span class="wave-bar w-1.5 bg-indigo-500/80 rounded transition-all duration-300 h-5"></span>
+                        <span class="wave-bar w-1.5 bg-indigo-500 rounded transition-all duration-300 h-8 animate-pulse"></span>
+                        <span class="wave-bar w-1.5 bg-indigo-400 rounded transition-all duration-300 h-6"></span>
+                        <span class="wave-bar w-1.5 bg-indigo-500 rounded transition-all duration-300 h-10"></span>
+                        <span class="wave-bar w-1.5 bg-indigo-400 rounded transition-all duration-300 h-7"></span>
+                        <span class="wave-bar w-1.5 bg-indigo-500 rounded transition-all duration-300 h-9"></span>
+                        <span class="wave-bar w-1.5 bg-indigo-500/80 rounded transition-all duration-300 h-6"></span>
+                        <span class="wave-bar w-1.5 bg-indigo-500/60 rounded transition-all duration-300 h-4"></span>
+                        <span class="wave-bar w-1.5 bg-indigo-500/40 rounded transition-all duration-300 h-2"></span>
+                        <span class="wave-bar w-1.5 bg-indigo-500/40 rounded transition-all duration-300 h-1"></span>
+                    </div>
+
+                    <!-- Simple native audio controller optimized -->
+                    <audio id="main-audio-element" class="w-full filter invert" controls></audio>
+
+                    <!-- Direct Action Buttons -->
+                    <div class="grid grid-cols-2 gap-3 mt-1">
+                        <button 
+                            id="btn-download-active" 
+                            class="py-2.5 px-4 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg text-sm font-medium transition flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-download"></i> Baixar Áudio
+                        </button>
+                        <button 
+                            id="btn-share-active" 
+                            class="py-2.5 px-4 bg-slate-900 hover:bg-slate-850 text-slate-300 rounded-lg text-sm font-medium transition flex items-center justify-center gap-2 border border-slate-800">
+                            <i class="fa-solid fa-link"></i> Copiar Link
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Loading Progress Modal Simulator (Overlay state inside the card) -->
+            <div id="loader-panel" class="hidden bg-slate-900 border border-indigo-500/30 rounded-2xl p-5 shadow-xl flex-col items-center justify-center text-center gap-4 py-8">
+                <div class="relative w-16 h-16">
+                    <div class="absolute inset-0 rounded-full border-4 border-slate-800"></div>
+                    <div class="absolute inset-0 rounded-full border-4 border-indigo-500 border-t-transparent animate-spin"></div>
+                    <div class="absolute inset-0 flex items-center justify-center text-indigo-400">
+                        <i class="fa-solid fa-brain animate-pulse"></i>
+                    </div>
+                </div>
+                <div>
+                    <h3 class="text-base font-semibold text-slate-200">Processando Texto</h3>
+                    <p class="text-xs text-indigo-400 font-medium mt-1" id="loader-progress-text">Preparando IA do Gemini...</p>
+                    <p class="text-[11px] text-slate-500 mt-2 max-w-xs leading-normal">Estamos dividindo o texto em fatias inteligentes e sintetizando as ondas neurais de áudio.</p>
+                </div>
+                
+                <!-- Micro Progress bar -->
+                <div class="w-full max-w-xs bg-slate-950 h-2 rounded-full overflow-hidden border border-slate-850 mt-1">
+                    <div id="loader-progress-bar" class="bg-indigo-500 h-full w-0 transition-all duration-300"></div>
+                </div>
+            </div>
+
+            <!-- History log -->
+            <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 sm:p-6 shadow-xl flex flex-col gap-4 flex-grow max-h-[350px]">
+                <div class="flex justify-between items-center">
+                    <h2 class="text-sm font-semibold uppercase tracking-wider text-slate-400 flex items-center gap-2">
+                        <i class="fa-solid fa-history text-slate-500"></i> Histórico Recente
+                    </h2>
+                    <button 
+                        id="btn-clear-history" 
+                        class="text-xs text-slate-500 hover:text-red-400 transition flex items-center gap-1">
+                        Limpar todos
+                    </button>
+                </div>
+
+                <div id="history-container" class="flex-grow overflow-y-auto flex flex-col gap-3 pr-1">
+                    <!-- Dynamic history item placeholder -->
+                    <div class="text-center py-8 text-xs text-slate-500 italic">
+                        Histórico vazio nesta sessão. Seus downloads gerados aparecerão aqui!
+                    </div>
+                </div>
+            </div>
+
+        </section>
+    </main>
+
+    <!-- Simple Footer -->
+    <footer class="border-t border-slate-900 bg-slate-950/80 py-6 text-center text-xs text-slate-500 mt-auto">
+        <p>© 2026 VozCaster. Powered by Google Gemini. Conversão de texto em fala de alto desempenho.</p>
+    </footer>
+
+    <script>
+        // Constants and State Variables
+        const GOOGLE_API_KEY = ""; // Kept as empty string. Canvas automatically supplies it at runtime.
+        
+        let audioHistory = [];
+        let activeAudioBlob = null;
+        let activeAudioUrl = null;
+
+        // UI DOM Elements
+        const ttsInput = document.getElementById('tts-input');
+        const charCounter = document.getElementById('char-counter');
+        const btnClear = document.getElementById('btn-clear');
+        const voiceSelect = document.getElementById('voice-select');
+        const toneSelect = document.getElementById('tone-select');
+        const btnGenerate = document.getElementById('btn-generate');
+        
+        const playerPlaceholder = document.getElementById('player-placeholder');
+        const activePlayerContainer = document.getElementById('active-player-container');
+        const mainAudioElement = document.getElementById('main-audio-element');
+        const playerTitle = document.getElementById('player-title');
+        const playerMeta = document.getElementById('player-meta');
+        
+        const loaderPanel = document.getElementById('loader-panel');
+        const loaderProgressText = document.getElementById('loader-progress-text');
+        const loaderProgressBar = document.getElementById('loader-progress-bar');
+        
+        const btnDownloadActive = document.getElementById('btn-download-active');
+        const btnShareActive = document.getElementById('btn-share-active');
+        
+        const historyContainer = document.getElementById('history-container');
+        const btnClearHistory = document.getElementById('btn-clear-history');
+        const toastContainer = document.getElementById('toast-container');
+
+        // Character Counting Functionality
+        ttsInput.addEventListener('input', () => {
+            const currentLen = ttsInput.value.length;
+            charCounter.innerText = `${currentLen} / 5000 caracteres`;
+            
+            if (currentLen > 4500) {
+                charCounter.className = 'text-xs text-amber-400 bg-slate-950 px-2.5 py-1 rounded-md border border-amber-500/20';
+            } else {
+                charCounter.className = 'text-xs text-slate-400 bg-slate-950 px-2.5 py-1 rounded-md border border-slate-850';
+            }
+        });
+
+        // Clear textarea action
+        btnClear.addEventListener('click', () => {
+            ttsInput.value = "";
+            charCounter.innerText = "0 / 5000 caracteres";
+            charCounter.className = 'text-xs text-slate-400 bg-slate-950 px-2.5 py-1 rounded-md border border-slate-850';
+            showToast("Campo de texto limpo", "info");
+        });
+
+        // Split text intelligently into smaller chunks to prevent API limits or failures.
+        // Google Gemini TTS handles segments up to a limit easily.
+        // Dividing into chunks of up to 900 characters preserves sentence boundaries.
+        function splitTextIntoSentenceChunks(text, maxChunkSize = 900) {
+            // Match sentence-like segments, keeping punctuation intact
+            const regex = /[^.!?;\n\r]+[.!?;\n\r]*|[\n\r]+/g;
+            const segments = text.match(regex) || [text];
+            
+            const chunks = [];
+            let currentChunk = "";
+
+            for (let segment of segments) {
+                if ((currentChunk + segment).length > maxChunkSize) {
+                    if (currentChunk.trim()) {
+                        chunks.push(currentChunk.trim());
+                    }
+                    currentChunk = segment;
+                } else {
+                    currentChunk += segment;
+                }
+            }
+            if (currentChunk.trim()) {
+                chunks.push(currentChunk.trim());
+            }
+
+            return chunks;
+        }
+
+        // Custom Dynamic Toast Notification System (Replacement for banned 'alert()')
+        function showToast(message, type = "success") {
+            const toast = document.createElement('div');
+            toast.className = `flex items-center gap-3 p-4 rounded-xl border shadow-lg text-xs font-medium transition duration-500 transform translate-x-12 opacity-0 select-none bg-slate-900 pointer-events-auto`;
+            
+            const colors = {
+                success: 'border-emerald-500/30 text-emerald-400 shadow-emerald-500/5',
+                error: 'border-rose-500/30 text-rose-400 shadow-rose-500/5',
+                info: 'border-indigo-500/30 text-indigo-400 shadow-indigo-500/5',
+                warn: 'border-amber-500/30 text-amber-400 shadow-amber-500/5'
+            };
+
+            const icons = {
+                success: '<i class="fa-solid fa-circle-check text-base"></i>',
+                error: '<i class="fa-solid fa-circle-exclamation text-base"></i>',
+                info: '<i class="fa-solid fa-circle-info text-base"></i>',
+                warn: '<i class="fa-solid fa-triangle-exclamation text-base"></i>'
+            };
+
+            toast.className += ` ${colors[type] || colors.info}`;
+            toast.innerHTML = `${icons[type] || icons.info} <span>${message}</span>`;
+            
+            toastContainer.appendChild(toast);
+            
+            // Trigger animation
+            setTimeout(() => {
+                toast.classList.remove('translate-x-12', 'opacity-0');
+            }, 10);
+
+            // Clear after timeout
+            setTimeout(() => {
+                toast.classList.add('translate-x-12', 'opacity-0');
+                setTimeout(() => {
+                    toast.remove();
+                }, 500);
+            }, 4000);
+        }
+
+        // Main Core API Synthesizer Call
+        async function fetchTTSChunkFromGemini(textPrompt, voiceName) {
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-tts:generateContent?key=${GOOGLE_API_KEY}`;
+            
+            const payload = {
+                contents: [{
+                    parts: [{ text: textPrompt }]
+                }],
+                generationConfig: {
+                    responseModalities: ["AUDIO"],
+                    speechConfig: {
+                        voiceConfig: {
+                            prebuiltVoiceConfig: { voiceName: voiceName }
+                        }
+                    }
+                }
+            };
+
+            // Implement exponential backoff parameters
+            let retries = 3;
+            let delay = 1000;
+
+            while (retries > 0) {
+                try {
+                    const response = await fetch(apiUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+
+                    if (!response.ok) {
+                        const errorBody = await response.json().catch(() => ({}));
+                        throw new Error(`API Error: ${response.status} - ${errorBody.error?.message || response.statusText}`);
+                    }
+
+                    const result = await response.json();
+                    const candidatePart = result?.candidates?.[0]?.content?.parts?.[0];
+                    const audioData = candidatePart?.inlineData?.data;
+                    const mimeType = candidatePart?.inlineData?.mimeType;
+
+                    if (!audioData) {
+                        throw new Error("Formato de resposta inesperado da API de fala.");
+                    }
+
+                    // Extract the sample rate from mimetype if present, defaults to 24000 for Gemini TTS
+                    let sampleRate = 24000;
+                    if (mimeType) {
+                        const match = mimeType.match(/rate=(\d+)/);
+                        if (match) sampleRate = parseInt(match[1], 10);
+                    }
+
+                    return { audioData, sampleRate };
+
+                } catch (error) {
+                    retries--;
+                    if (retries === 0) throw error;
+                    // Exponential backoff delay
+                    await new Promise(resolve => setTimeout(resolve, delay));
+                    delay *= 2;
+                }
+            }
+        }
+
+        // Utility: Convert Base64 string to a standard ArrayBuffer
+        function base64ToArrayBuffer(base64) {
+            const binaryString = atob(base64);
+            const len = binaryString.length;
+            const bytes = new Uint8Array(len);
+            for (let i = 0; i < len; i++) {
+                bytes[i] = binaryString.charCodeAt(i);
+            }
+            return bytes.buffer;
+        }
+
+        // Utility: Merge multiple raw Int16Arrays (PCM arrays) together sequential
+        function mergeInt16Arrays(arrays) {
+            let totalLength = 0;
+            for (const arr of arrays) {
+                totalLength += arr.length;
+            }
+            const merged = new Int16Array(totalLength);
+            let offset = 0;
+            for (const arr of arrays) {
+                merged.set(arr, offset);
+                offset += arr.length;
+            }
+            return merged;
+        }
+
+        // Convert raw PCM 16-bit audio data into a playable, downloadable WAV file
+        function pcmToWav(pcm16Array, sampleRate) {
+            const buffer = new ArrayBuffer(44 + pcm16Array.byteLength);
+            const view = new DataView(buffer);
+            
+            /* RIFF identifier */
+            writeString(view, 0, 'RIFF');
+            /* file length */
+            view.setUint32(4, 36 + pcm16Array.byteLength, true);
+            /* RIFF type */
+            writeString(view, 8, 'WAVE');
+            /* format chunk identifier */
+            writeString(view, 12, 'fmt ');
+            /* format chunk length */
+            view.setUint32(16, 16, true);
+            /* sample format (raw PCM16 = 1) */
+            view.setUint16(20, 1, true);
+            /* channel count (Mono = 1) */
+            view.setUint16(22, 1, true);
+            /* sample rate */
+            view.setUint32(24, sampleRate, true);
+            /* byte rate = sampleRate * channels * bytesPerSample */
+            view.setUint32(28, sampleRate * 1 * 2, true);
+            /* block align = channels * bytesPerSample */
+            view.setUint16(32, 2, true);
+            /* bits per sample */
+            view.setUint16(34, 16, true);
+            /* data chunk identifier */
+            writeString(view, 36, 'data');
+            /* data chunk length */
+            view.setUint32(40, pcm16Array.byteLength, true);
+
+            // Write actual signed PCM 16-bit audio samples
+            for (let i = 0; i < pcm16Array.length; i++) {
+                view.setInt16(44 + i * 2, pcm16Array[i], true);
+            }
+
+            return new Blob([view], { type: 'audio/wav' });
+        }
+
+        function writeString(view, offset, string) {
+            for (let i = 0; i < string.length; i++) {
+                view.setUint8(offset + i, string.charCodeAt(i));
+            }
+        }
+
+        // Helper to format date timestamps
+        function formatTimestamp() {
+            const now = new Date();
+            const pad = (n) => n.toString().padStart(2, '0');
+            return `${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
+        }
+
+        // Main Execution Handler
+        btnGenerate.addEventListener('click', async () => {
+            const rawText = ttsInput.value.trim();
+            if (!rawText) {
+                showToast("Por favor, digite algum texto primeiro.", "warn");
+                return;
+            }
+
+            const chosenVoice = voiceSelect.value;
+            const chosenToneInstruction = toneSelect.value;
+
+            // Transition UI into loading state
+            btnGenerate.disabled = true;
+            btnGenerate.classList.add('opacity-50', 'cursor-not-allowed');
+            
+            playerPlaceholder.classList.add('hidden');
+            activePlayerContainer.classList.add('hidden');
+            loaderPanel.classList.remove('hidden');
+            
+            loaderProgressText.innerText = "Analisando estrutura de texto...";
+            loaderProgressBar.style.width = '10%';
+
+            try {
+                // Split text into chunks
+                const chunks = splitTextIntoSentenceChunks(rawText);
+                const totalChunks = chunks.length;
+                const pcmArrays = [];
+                let outputSampleRate = 24000; // default initial fallback
+
+                for (let idx = 0; idx < totalChunks; idx++) {
+                    const chunkNum = idx + 1;
+                    loaderProgressText.innerText = `Processando parte ${chunkNum} de ${totalChunks}...`;
+                    const percentComplete = Math.floor(10 + (chunkNum / totalChunks) * 80);
+                    loaderProgressBar.style.width = `${percentComplete}%`;
+
+                    // Formulate full prompt command including style / tone if requested
+                    const textWithTone = `${chosenToneInstruction} ${chunks[idx]}`;
+                    
+                    // Fetch from Google Gemini API
+                    const resultData = await fetchTTSChunkFromGemini(textWithTone, chosenVoice);
+                    outputSampleRate = resultData.sampleRate;
+
+                    // Decompress/convert base64 chunk to ArrayBuffer
+                    const arrayBuffer = base64ToArrayBuffer(resultData.audioData);
+                    const pcm16 = new Int16Array(arrayBuffer);
+                    pcmArrays.push(pcm16);
+                }
+
+                // Compile all chunks together
+                loaderProgressText.innerText = "Unificando faixas de som...";
+                loaderProgressBar.style.width = '95%';
+                
+                const mergedPCM = mergeInt16Arrays(pcmArrays);
+                const wavBlob = pcmToWav(mergedPCM, outputSampleRate);
+
+                // Build Blob resource URL
+                if (activeAudioUrl) {
+                    URL.revokeObjectURL(activeAudioUrl); // free memory
+                }
+                activeAudioBlob = wavBlob;
+                activeAudioUrl = URL.createObjectURL(wavBlob);
+
+                // Play Audio in player
+                mainAudioElement.src = activeAudioUrl;
+                playerTitle.innerText = `audio_fala_${chosenVoice}_${formatTimestamp().replace(/:/g, '-')}.wav`;
+                
+                // Formulate duration approximation
+                const totalSeconds = Math.round(mergedPCM.length / outputSampleRate);
+                const formattedDuration = `${Math.floor(totalSeconds / 60)}m ${totalSeconds % 60}s`;
+                playerMeta.innerText = `Voz: ${chosenVoice} • Duração est.: ${formattedDuration} • WAV`;
+
+                // Update UI state to active player
+                loaderPanel.classList.add('hidden');
+                activePlayerContainer.classList.remove('hidden');
+                showToast("Áudio sintetizado com sucesso!", "success");
+
+                // Add to History list
+                addToHistoryList({
+                    id: Date.now(),
+                    title: playerTitle.innerText,
+                    voice: chosenVoice,
+                    duration: formattedDuration,
+                    blob: wavBlob,
+                    url: activeAudioUrl
+                });
+
+            } catch (err) {
+                console.error(err);
+                loaderPanel.classList.add('hidden');
+                playerPlaceholder.classList.remove('hidden');
+                showToast(err.message || "Houve uma falha ao sintetizar o áudio.", "error");
+            } finally {
+                btnGenerate.disabled = false;
+                btnGenerate.classList.remove('opacity-50', 'cursor-not-allowed');
+            }
+        });
+
+        // Downloader action hook
+        btnDownloadActive.addEventListener('click', () => {
+            if (!activeAudioUrl) return;
+            const a = document.createElement('a');
+            a.href = activeAudioUrl;
+            a.download = playerTitle.innerText;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            showToast("Iniciando download do seu áudio!", "success");
+        });
+
+        // Copy link action hook
+        btnShareActive.addEventListener('click', () => {
+            if (!activeAudioUrl) return;
+            
+            // In typical iFrame configurations navigator.clipboard can fail, fallback to execCommand
+            try {
+                const tempInput = document.createElement('input');
+                tempInput.value = window.location.href;
+                document.body.appendChild(tempInput);
+                tempInput.select();
+                document.execCommand('copy');
+                document.body.removeChild(tempInput);
+                showToast("Link do aplicativo copiado!", "info");
+            } catch (err) {
+                showToast("Não foi possível copiar automaticamente.", "warn");
+            }
+        });
+
+        // History Management Core
+        function addToHistoryList(item) {
+            audioHistory.unshift(item); // insert at start
+            renderHistory();
+        }
+
+        function renderHistory() {
+            if (audioHistory.length === 0) {
+                historyContainer.innerHTML = `
+                    <div class="text-center py-8 text-xs text-slate-500 italic">
+                        Histórico vazio nesta sessão. Seus downloads gerados aparecerão aqui!
+                    </div>
+                `;
+                return;
+            }
+
+            historyContainer.innerHTML = "";
+            audioHistory.forEach((item) => {
+                const div = document.createElement('div');
+                div.className = "flex items-center justify-between p-3 rounded-xl bg-slate-950 border border-slate-850 hover:border-slate-800 transition text-xs";
+                div.innerHTML = `
+                    <div class="flex items-center gap-2.5 max-w-[65%] overflow-hidden">
+                        <i class="fa-solid fa-file-audio text-slate-400 text-sm"></i>
+                        <div class="truncate">
+                            <p class="font-medium text-slate-300 truncate">${item.title}</p>
+                            <p class="text-[10px] text-slate-500">${item.voice} • ${item.duration}</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <button class="btn-play-history p-2 rounded bg-slate-900 hover:bg-slate-850 border border-slate-800 text-indigo-400 hover:text-indigo-300 transition" title="Escutar no player">
+                            <i class="fa-solid fa-play"></i>
+                        </button>
+                        <button class="btn-dl-history p-2 rounded bg-slate-900 hover:bg-slate-850 border border-slate-800 text-slate-300 hover:text-white transition" title="Download">
+                            <i class="fa-solid fa-download"></i>
+                        </button>
+                    </div>
+                `;
+
+                // Set actions
+                div.querySelector('.btn-play-history').addEventListener('click', () => {
+                    // Update active player
+                    if (activeAudioUrl) {
+                        URL.revokeObjectURL(activeAudioUrl);
+                    }
+                    activeAudioBlob = item.blob;
+                    activeAudioUrl = URL.createObjectURL(item.blob);
+                    
+                    mainAudioElement.src = activeAudioUrl;
+                    playerTitle.innerText = item.title;
+                    playerMeta.innerText = `Voz: ${item.voice} • Duração: ${item.duration} • WAV`;
+                    
+                    playerPlaceholder.classList.add('hidden');
+                    activePlayerContainer.classList.remove('hidden');
+                    
+                    mainAudioElement.play();
+                    showToast("Áudio carregado no player!", "info");
+                });
+
+                div.querySelector('.btn-dl-history').addEventListener('click', () => {
+                    const tempUrl = URL.createObjectURL(item.blob);
+                    const a = document.createElement('a');
+                    a.href = tempUrl;
+                    a.download = item.title;
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    URL.revokeObjectURL(tempUrl);
+                    showToast("Iniciando download!", "success");
+                });
+
+                historyContainer.appendChild(div);
+            });
+        }
+
+        // Clear all history list
+        btnClearHistory.addEventListener('click', () => {
+            if (audioHistory.length === 0) return;
+            audioHistory = [];
+            renderHistory();
+            showToast("Histórico limpo com sucesso.", "info");
+        });
+
+        // Waveform Animation Link to Audio Playback State
+        const waveBars = document.querySelectorAll('.wave-bar');
+        let animationInterval = null;
+
+        function animateWaveform() {
+            waveBars.forEach(bar => {
+                // Generate relative high / low frequencies dynamic
+                const randomHeight = Math.floor(Math.random() * 32) + 4;
+                bar.style.height = `${randomHeight}px`;
+            });
+        }
+
+        mainAudioElement.addEventListener('play', () => {
+            animationInterval = setInterval(animateWaveform, 120);
+            waveBars.forEach(bar => bar.classList.add('bg-indigo-400'));
+        });
+
+        mainAudioElement.addEventListener('pause', () => {
+            clearInterval(animationInterval);
+            waveBars.forEach(bar => {
+                bar.style.height = '4px';
+                bar.classList.remove('bg-indigo-400');
+            });
+        });
+
+        mainAudioElement.addEventListener('ended', () => {
+            clearInterval(animationInterval);
+            waveBars.forEach(bar => {
+                bar.style.height = '4px';
+                bar.classList.remove('bg-indigo-400');
+            });
+        });
+    </script>
+</body>
+</html>
