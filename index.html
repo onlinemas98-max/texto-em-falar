@@ -1,12 +1,12 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-PT">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VozCaster - Texto em Fala Ilimitado</title>
+    <title>VozCaster - Texto em Voz Ilimitado</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Font Inter & Play icons -->
+    <!-- Fontes e Ícones -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
@@ -14,86 +14,160 @@
         body {
             font-family: 'Inter', sans-serif;
         }
-        /* Custom scrollbar */
+        /* Barra de rolagem personalizada */
         ::-webkit-scrollbar {
             width: 6px;
             height: 6px;
         }
         ::-webkit-scrollbar-track {
-            background: #1e293b;
+            background: #0f172a;
         }
         ::-webkit-scrollbar-thumb {
-            background: #475569;
+            background: #334155;
             border-radius: 4px;
         }
         ::-webkit-scrollbar-thumb:hover {
-            background: #64748b;
+            background: #475569;
         }
     </style>
 </head>
 <body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col">
 
-    <!-- Header -->
-    <header class="border-b border-slate-800 bg-slate-900/80 backdrop-blur sticky top-0 z-50 px-4 py-4 sm:px-8">
+    <!-- Cabeçalho -->
+    <header class="border-b border-slate-900 bg-slate-900/80 backdrop-blur sticky top-0 z-50 px-4 py-4 sm:px-8">
         <div class="max-w-7xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-4">
             <div class="flex items-center gap-3">
-                <div class="p-2.5 bg-gradient-to-tr from-violet-600 to-indigo-600 rounded-xl shadow-lg shadow-indigo-500/20">
-                    <i class="fa-solid fa-microphone-lines text-2xl text-white"></i>
+                <div class="p-2.5 bg-gradient-to-tr from-indigo-600 to-violet-600 rounded-xl shadow-lg shadow-indigo-500/20">
+                    <i class="fa-solid fa-microphone-lines text-2xl text-white animate-pulse"></i>
                 </div>
                 <div>
                     <h1 class="text-xl font-bold tracking-tight bg-gradient-to-r from-white via-indigo-200 to-indigo-400 bg-clip-text text-transparent">
                         VozCaster
                     </h1>
-                    <p class="text-xs text-slate-400">Texto em Fala Ilimitado e Inteligente</p>
+                    <p class="text-xs text-slate-400">Conversor de Texto em Fala Inteligente e Ilimitado</p>
                 </div>
             </div>
             
             <div class="flex items-center gap-4">
-                <span class="flex h-2 w-2 relative">
-                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                    <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
-                </span>
-                <span class="text-xs text-slate-300 font-medium bg-slate-800/80 px-3 py-1.5 rounded-full border border-slate-700">
-                    Gemini Neural Audio Engine
+                <button 
+                    id="btn-toggle-settings" 
+                    class="flex items-center gap-2 text-xs text-slate-300 bg-slate-800 hover:bg-slate-700/80 px-3.5 py-2 rounded-xl border border-slate-700 transition">
+                    <i class="fa-solid fa-key"></i> Chave de API do Google
+                </button>
+                <span class="text-xs text-emerald-400 font-medium bg-emerald-950/40 px-3 py-1.5 rounded-full border border-emerald-800/30 flex items-center gap-2">
+                    <span class="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-ping"></span>
+                    Motor Gemini 2.5
                 </span>
             </div>
         </div>
     </header>
 
-    <!-- Main Content Grid -->
+    <!-- Alerta de Chave de API Necessária (Apenas visível se estiver hospedado externamente e sem chave) -->
+    <div id="external-key-warning" class="hidden max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 mt-4">
+        <div class="bg-gradient-to-r from-amber-950/40 to-orange-950/20 border border-amber-500/30 rounded-2xl p-4 sm:p-5 shadow-lg flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            <div class="flex items-start gap-3">
+                <div class="p-2 bg-amber-500/10 text-amber-400 rounded-lg mt-0.5 sm:mt-0">
+                    <i class="fa-solid fa-triangle-exclamation text-lg"></i>
+                </div>
+                <div>
+                    <h4 class="text-sm font-semibold text-amber-300">Configuração do GitHub Pages Detetada</h4>
+                    <p class="text-xs text-slate-300 mt-1 leading-relaxed">
+                        Para que a conversão funcione no seu site próprio, necessita de inserir uma chave de API pessoal e gratuita. Obtenha-a no <a href="https://aistudio.google.com/" target="_blank" class="text-amber-400 underline hover:text-amber-300">Google AI Studio</a>.
+                    </p>
+                </div>
+            </div>
+            <button 
+                id="btn-setup-now" 
+                class="px-4 py-2 bg-amber-500 hover:bg-amber-450 text-slate-950 text-xs font-bold rounded-xl transition shadow-md whitespace-nowrap">
+                Configurar Chave Agora
+            </button>
+        </div>
+    </div>
+
+    <!-- Painel de Definições de API -->
+    <div id="settings-panel" class="hidden max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 mt-4 transition-all">
+        <div class="bg-slate-900/95 border border-indigo-500/30 rounded-2xl p-4 sm:p-5 shadow-xl flex flex-col gap-3">
+            <div class="flex justify-between items-center">
+                <h3 class="text-sm font-semibold text-indigo-400 flex items-center gap-2">
+                    <i class="fa-solid fa-key"></i> Chave de API Google Gemini
+                </h3>
+                <button id="btn-close-settings" class="text-slate-400 hover:text-white transition">
+                    <i class="fa-solid fa-times"></i>
+                </button>
+            </div>
+            <p class="text-xs text-slate-300 leading-relaxed">
+                A sua chave é guardada localmente de forma segura no seu navegador (localStorage) e nunca é partilhada com terceiros.
+            </p>
+            <div class="flex flex-col sm:flex-row gap-3">
+                <input 
+                    type="password" 
+                    id="api-key-input" 
+                    class="flex-grow bg-slate-950 border border-slate-800 focus:border-indigo-500 rounded-xl p-3 text-xs text-slate-200 outline-none transition placeholder-slate-600"
+                    placeholder="Cole aqui a sua chave de API do Google AI Studio (Ex: AIzaSy...)">
+                <div class="flex gap-2">
+                    <button id="btn-save-key" class="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-semibold transition flex-grow sm:flex-grow-0">
+                        Guardar Chave
+                    </button>
+                    <button id="btn-clear-key" class="px-3 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-slate-200 rounded-xl text-xs transition">
+                        Limpar
+                    </button>
+                </div>
+            </div>
+            <div class="text-[11px] text-slate-400 flex items-center gap-1.5">
+                <i class="fa-solid fa-circle-question text-indigo-400"></i>
+                <span>Ainda não tem uma chave? Crie uma inteiramente grátis acedendo ao <a href="https://aistudio.google.com/" target="_blank" class="text-indigo-400 hover:underline">Google AI Studio</a>.</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Conteúdo Principal -->
     <main class="flex-grow max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8 grid grid-cols-1 lg:grid-cols-12 gap-8">
         
-        <!-- Left Panel: Text input and settings (7 cols) -->
+        <!-- Painel Esquerdo: Entrada de Texto (7 colunas) -->
         <section class="lg:col-span-7 flex flex-col gap-6">
-            <!-- Form Area -->
             <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 sm:p-6 shadow-xl flex flex-col gap-5">
                 <div class="flex justify-between items-center">
                     <h2 class="text-lg font-semibold flex items-center gap-2 text-indigo-300">
-                        <i class="fa-solid fa-keyboard"></i> Digite ou Cole seu Texto
+                        <i class="fa-solid fa-keyboard"></i> Digite ou Cole o seu Texto
                     </h2>
                     <span id="char-counter" class="text-xs text-slate-400 bg-slate-950 px-2.5 py-1 rounded-md border border-slate-850">
-                        0 / 5000 caracteres
+                        0 / 8000 caracteres
                     </span>
                 </div>
 
-                <!-- Textarea -->
+                <!-- Campo de Texto -->
                 <div class="relative">
                     <textarea 
                         id="tts-input" 
-                        rows="8" 
-                        maxlength="5000"
+                        rows="9" 
+                        maxlength="8000"
                         class="w-full bg-slate-950 border border-slate-800 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 rounded-xl p-4 text-slate-100 placeholder-slate-500 text-sm sm:text-base leading-relaxed transition resize-none outline-none"
-                        placeholder="Insira aqui o texto que você deseja transformar em fala. Para textos mais longos de até 5 minutos (~4000 caracteres), nossa IA dividirá e gerará um arquivo de áudio unificado completo para download ilimitado..."></textarea>
+                        placeholder="Escreva aqui o texto que deseja converter em voz profissional. Se o texto for longo (até 5 minutos), o nosso sistema irá dividi-lo e juntá-lo de forma inteligente num ficheiro de áudio contínuo e pronto para descarregar sem limites..."></textarea>
                     
                     <button 
                         id="btn-clear" 
-                        class="absolute bottom-3 right-3 text-xs text-slate-400 hover:text-red-400 transition bg-slate-900 px-2 py-1 rounded border border-slate-800 hover:border-red-500/20 flex items-center gap-1">
-                        <i class="fa-regular fa-trash-can"></i> Limpar
+                        class="absolute bottom-3 right-3 text-xs text-slate-400 hover:text-red-400 transition bg-slate-900 px-2.5 py-1 rounded-lg border border-slate-800 hover:border-red-500/20 flex items-center gap-1.5">
+                        <i class="fa-regular fa-trash-can"></i> Limpar Campo
                     </button>
                 </div>
 
-                <!-- Voice Selection Controls -->
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <!-- Controladores de Configurações de Voz -->
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div>
+                        <label class="block text-xs font-medium text-slate-400 mb-1.5 flex items-center gap-1.5">
+                            <i class="fa-solid fa-globe text-indigo-400"></i> Idioma Base
+                        </label>
+                        <select 
+                            id="lang-select" 
+                            class="w-full bg-slate-950 border border-slate-800 focus:border-indigo-500 rounded-xl p-3 text-sm text-slate-200 outline-none transition">
+                            <option value="pt-BR" selected>Português (Brasil)</option>
+                            <option value="pt-PT">Português (Portugal)</option>
+                            <option value="en-US">Inglês (Estados Unidos)</option>
+                            <option value="es-ES">Espanhol (Espanha)</option>
+                            <option value="fr-FR">Francês (França)</option>
+                        </select>
+                    </div>
+
                     <div>
                         <label class="block text-xs font-medium text-slate-400 mb-1.5 flex items-center gap-1.5">
                             <i class="fa-solid fa-circle-user text-indigo-400"></i> Modelo de Voz
@@ -101,58 +175,69 @@
                         <select 
                             id="voice-select" 
                             class="w-full bg-slate-950 border border-slate-800 focus:border-indigo-500 rounded-xl p-3 text-sm text-slate-200 outline-none transition">
-                            <option value="Zephyr" selected>Zephyr (Brilhante, Alta clareza)</option>
-                            <option value="Puck">Puck (Alegre e Dinâmico)</option>
-                            <option value="Charon">Charon (Informativo e Sério)</option>
-                            <option value="Kore">Kore (Firme e Imponente)</option>
-                            <option value="Fenrir">Fenrir (Excitado e Rápido)</option>
-                            <option value="Aoede">Aoede (Calmo e Suave)</option>
-                            <option value="Callirrhoe">Callirrhoe (Espontâneo)</option>
-                            <option value="Despina">Despina (Macio e Acolhedor)</option>
-                            <option value="Erinome">Erinome (Voz Clara e Limpa)</option>
-                            <option value="Algieba">Algieba (Aveludado/Profissional)</option>
-                            <option value="Gacrux">Gacrux (Maduro e Equilibrado)</option>
+                            <option value="Zephyr" selected>Zephyr (Claro / Natural)</option>
+                            <option value="Puck">Puck (Alegre / Dinâmico)</option>
+                            <option value="Charon">Charon (Profissional / Firme)</option>
+                            <option value="Kore">Kore (Neutro / Equilibrado)</option>
+                            <option value="Fenrir">Fenrir (Excitado / Rápido)</option>
+                            <option value="Aoede">Aoede (Suave / Acolhedor)</option>
                         </select>
                     </div>
 
                     <div>
                         <label class="block text-xs font-medium text-slate-400 mb-1.5 flex items-center gap-1.5">
-                            <i class="fa-solid fa-wand-magic-sparkles text-indigo-400"></i> Tom da Locução
+                            <i class="fa-solid fa-wand-magic-sparkles text-indigo-400"></i> Estilo e Expressão
                         </label>
                         <select 
                             id="tone-select" 
                             class="w-full bg-slate-950 border border-slate-800 focus:border-indigo-500 rounded-xl p-3 text-sm text-slate-200 outline-none transition">
                             <option value="Say naturally:">Natural (Padrão)</option>
-                            <option value="Say cheerfully:">Entusiasta e Alegre</option>
+                            <option value="Say cheerfully:">Entusiasmado e Alegre</option>
                             <option value="Say in a calm, professional tone:">Calmo e Profissional</option>
                             <option value="Say seriously and authoritatively:">Sério e Autoritário</option>
-                            <option value="Say in a warm, welcoming whisper:">Sussurro Caloroso</option>
-                            <option value="Say in a mysterious, soft whisper:">Mistério e Suspense</option>
-                            <option value="Say as an energetic radio announcer:">Locutor de Rádio Enérgico</option>
-                            <option value="Say slowly and instructively:">Didático e Pausado</option>
+                            <option value="Say in a warm, welcoming whisper:">Sussurro Acolhedor</option>
                         </select>
                     </div>
                 </div>
 
-                <!-- Convert Button -->
+                <!-- Botão de Ação -->
                 <button 
                     id="btn-generate"
                     class="w-full py-4 px-6 rounded-xl bg-gradient-to-r from-indigo-600 via-indigo-500 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white font-semibold text-base transition flex items-center justify-center gap-3 shadow-lg shadow-indigo-500/10 hover:shadow-indigo-500/20 active:scale-[0.99]">
-                    <i class="fa-solid fa-wand-magic-sparkles"></i> Gerar Áudio
+                    <i class="fa-solid fa-wand-magic-sparkles animate-pulse"></i> Gerar Áudio Completo
                 </button>
             </div>
 
-            <!-- Custom Notification Toaster Container -->
+            <!-- Painel de Diagnóstico (Fica visível automaticamente em caso de erros) -->
+            <div id="diagnostic-panel" class="hidden bg-slate-950 border border-red-500/20 rounded-2xl p-4 flex flex-col gap-3">
+                <div class="flex items-center gap-2 text-red-400 text-sm font-semibold">
+                    <i class="fa-solid fa-triangle-exclamation"></i> Relatório Técnico de Erro
+                </div>
+                <div class="text-xs text-slate-300 space-y-1.5 bg-slate-900 p-3 rounded-lg border border-slate-850">
+                    <p><strong>Código de Status HTTP:</strong> <span id="error-status" class="text-red-400 font-mono">--</span></p>
+                    <p><strong>Origem da Configuração:</strong> <span id="error-source" class="text-slate-200 font-mono">--</span></p>
+                    <p><strong>Descrição do Erro:</strong> <span id="error-desc" class="text-slate-400 font-mono">Nenhum erro ativo de momento.</span></p>
+                </div>
+                <div class="p-3 bg-indigo-950/20 rounded-lg border border-indigo-500/20 text-xs text-indigo-300 leading-relaxed flex gap-2.5">
+                    <i class="fa-solid fa-circle-info mt-0.5 text-base text-indigo-400"></i>
+                    <div>
+                        <strong class="block mb-0.5 text-white">Como resolver isto no seu site próprio?</strong>
+                        Siga as instruções clicando em "Chave de API do Google" no canto superior direito e insira a sua credencial pessoal. É totalmente gratuita, rápida de obter e elimina todos os limites.
+                    </div>
+                </div>
+            </div>
+
+            <!-- Contentor para Notificações Flutuantes -->
             <div id="toast-container" class="fixed top-5 right-5 z-50 flex flex-col gap-3 pointer-events-none"></div>
         </section>
 
-        <!-- Right Panel: Audio player, current track, and History (5 cols) -->
+        <!-- Painel Direito: Player e Histórico (5 colunas) -->
         <section class="lg:col-span-5 flex flex-col gap-6">
             
-            <!-- Audio Output & Active Player -->
+            <!-- Output e Player Ativo -->
             <div class="bg-gradient-to-b from-slate-900 to-slate-950 border border-slate-800 rounded-2xl p-5 sm:p-6 shadow-xl flex flex-col gap-6">
                 <h2 class="text-lg font-semibold flex items-center gap-2 text-violet-400">
-                    <i class="fa-solid fa-volume-high"></i> Player de Áudio
+                    <i class="fa-solid fa-volume-high"></i> Leitor de Áudio
                 </h2>
 
                 <div id="player-placeholder" class="py-12 px-4 border border-dashed border-slate-800 rounded-xl flex flex-col items-center justify-center text-center gap-3">
@@ -161,11 +246,11 @@
                     </div>
                     <div>
                         <p class="text-sm font-medium text-slate-300">Nenhum áudio gerado ainda</p>
-                        <p class="text-xs text-slate-500 max-w-xs mt-1">Escreva um texto no painel esquerdo e clique em "Gerar Áudio" para escutar e baixar.</p>
+                        <p class="text-xs text-slate-500 max-w-xs mt-1">Escreva algo e prima "Gerar Áudio Completo" para dar vida ao seu texto de forma ilimitada.</p>
                     </div>
                 </div>
 
-                <!-- Active Audio Player Element (hidden by default) -->
+                <!-- Interface Ativa do Player -->
                 <div id="active-player-container" class="hidden flex flex-col gap-5 bg-slate-950/60 border border-slate-850 p-4 rounded-xl">
                     <div class="flex items-center gap-3">
                         <div class="w-10 h-10 rounded-lg bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-indigo-400">
@@ -177,33 +262,31 @@
                         </div>
                     </div>
 
-                    <!-- Waveform Animation simulation -->
+                    <!-- Ondas Sonoras Decorativas Dinâmicas -->
                     <div class="h-12 w-full flex items-center justify-center gap-1 px-4 bg-slate-950 rounded-lg border border-slate-900 overflow-hidden">
-                        <!-- Simulated lines of soundwave -->
-                        <span class="wave-bar w-1.5 bg-indigo-500/40 rounded transition-all duration-300 h-1"></span>
-                        <span class="wave-bar w-1.5 bg-indigo-500/40 rounded transition-all duration-300 h-1.5"></span>
-                        <span class="wave-bar w-1.5 bg-indigo-500/60 rounded transition-all duration-300 h-3"></span>
-                        <span class="wave-bar w-1.5 bg-indigo-500/80 rounded transition-all duration-300 h-5"></span>
-                        <span class="wave-bar w-1.5 bg-indigo-500 rounded transition-all duration-300 h-8 animate-pulse"></span>
-                        <span class="wave-bar w-1.5 bg-indigo-400 rounded transition-all duration-300 h-6"></span>
+                        <span class="wave-bar w-1.5 bg-indigo-500/30 rounded transition-all duration-300 h-1"></span>
+                        <span class="wave-bar w-1.5 bg-indigo-500/30 rounded transition-all duration-300 h-1.5"></span>
+                        <span class="wave-bar w-1.5 bg-indigo-500/30 rounded transition-all duration-300 h-3"></span>
+                        <span class="wave-bar w-1.5 bg-indigo-500/40 rounded transition-all duration-300 h-5"></span>
+                        <span class="wave-bar w-1.5 bg-indigo-500/50 rounded transition-all duration-300 h-8"></span>
+                        <span class="wave-bar w-1.5 bg-indigo-400/60 rounded transition-all duration-300 h-6"></span>
                         <span class="wave-bar w-1.5 bg-indigo-500 rounded transition-all duration-300 h-10"></span>
-                        <span class="wave-bar w-1.5 bg-indigo-400 rounded transition-all duration-300 h-7"></span>
+                        <span class="wave-bar w-1.5 bg-indigo-400/60 rounded transition-all duration-300 h-7"></span>
                         <span class="wave-bar w-1.5 bg-indigo-500 rounded transition-all duration-300 h-9"></span>
-                        <span class="wave-bar w-1.5 bg-indigo-500/80 rounded transition-all duration-300 h-6"></span>
-                        <span class="wave-bar w-1.5 bg-indigo-500/60 rounded transition-all duration-300 h-4"></span>
-                        <span class="wave-bar w-1.5 bg-indigo-500/40 rounded transition-all duration-300 h-2"></span>
-                        <span class="wave-bar w-1.5 bg-indigo-500/40 rounded transition-all duration-300 h-1"></span>
+                        <span class="wave-bar w-1.5 bg-indigo-500/50 rounded transition-all duration-300 h-6"></span>
+                        <span class="wave-bar w-1.5 bg-indigo-500/40 rounded transition-all duration-300 h-4"></span>
+                        <span class="wave-bar w-1.5 bg-indigo-500/30 rounded transition-all duration-300 h-2"></span>
+                        <span class="wave-bar w-1.5 bg-indigo-500/30 rounded transition-all duration-300 h-1"></span>
                     </div>
 
-                    <!-- Simple native audio controller optimized -->
                     <audio id="main-audio-element" class="w-full filter invert" controls></audio>
 
-                    <!-- Direct Action Buttons -->
+                    <!-- Ações de Áudio -->
                     <div class="grid grid-cols-2 gap-3 mt-1">
                         <button 
                             id="btn-download-active" 
-                            class="py-2.5 px-4 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg text-sm font-medium transition flex items-center justify-center gap-2">
-                            <i class="fa-solid fa-download"></i> Baixar Áudio
+                            class="py-2.5 px-4 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg text-sm font-medium transition flex items-center justify-center gap-2 shadow-sm">
+                            <i class="fa-solid fa-download"></i> Descarregar (.wav)
                         </button>
                         <button 
                             id="btn-share-active" 
@@ -214,44 +297,43 @@
                 </div>
             </div>
 
-            <!-- Loading Progress Modal Simulator (Overlay state inside the card) -->
+            <!-- Painel de Carregamento e Progresso -->
             <div id="loader-panel" class="hidden bg-slate-900 border border-indigo-500/30 rounded-2xl p-5 shadow-xl flex-col items-center justify-center text-center gap-4 py-8">
                 <div class="relative w-16 h-16">
                     <div class="absolute inset-0 rounded-full border-4 border-slate-800"></div>
                     <div class="absolute inset-0 rounded-full border-4 border-indigo-500 border-t-transparent animate-spin"></div>
                     <div class="absolute inset-0 flex items-center justify-center text-indigo-400">
-                        <i class="fa-solid fa-brain animate-pulse"></i>
+                        <i class="fa-solid fa-brain animate-pulse text-lg"></i>
                     </div>
                 </div>
                 <div>
-                    <h3 class="text-base font-semibold text-slate-200">Processando Texto</h3>
-                    <p class="text-xs text-indigo-400 font-medium mt-1" id="loader-progress-text">Preparando IA do Gemini...</p>
-                    <p class="text-[11px] text-slate-500 mt-2 max-w-xs leading-normal">Estamos dividindo o texto em fatias inteligentes e sintetizando as ondas neurais de áudio.</p>
+                    <h3 class="text-base font-semibold text-slate-200">A processar locução</h3>
+                    <p class="text-xs text-indigo-400 font-medium mt-1 animate-pulse" id="loader-progress-text">A preparar as redes neuronais do Google...</p>
+                    <p class="text-[11px] text-slate-500 mt-2 max-w-xs leading-normal">Estamos a fatiar e converter o texto em blocos sequenciais para garantir que não existem falhas na narração.</p>
                 </div>
                 
-                <!-- Micro Progress bar -->
+                <!-- Barra de progresso visual -->
                 <div class="w-full max-w-xs bg-slate-950 h-2 rounded-full overflow-hidden border border-slate-850 mt-1">
                     <div id="loader-progress-bar" class="bg-indigo-500 h-full w-0 transition-all duration-300"></div>
                 </div>
             </div>
 
-            <!-- History log -->
+            <!-- Histórico Local de Conversões -->
             <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 sm:p-6 shadow-xl flex flex-col gap-4 flex-grow max-h-[350px]">
                 <div class="flex justify-between items-center">
-                    <h2 class="text-sm font-semibold uppercase tracking-wider text-slate-400 flex items-center gap-2">
-                        <i class="fa-solid fa-history text-slate-500"></i> Histórico Recente
+                    <h2 class="text-xs font-semibold uppercase tracking-wider text-slate-400 flex items-center gap-2">
+                        <i class="fa-solid fa-history text-slate-500"></i> Histórico da Sessão
                     </h2>
                     <button 
                         id="btn-clear-history" 
                         class="text-xs text-slate-500 hover:text-red-400 transition flex items-center gap-1">
-                        Limpar todos
+                        Limpar histórico
                     </button>
                 </div>
 
                 <div id="history-container" class="flex-grow overflow-y-auto flex flex-col gap-3 pr-1">
-                    <!-- Dynamic history item placeholder -->
                     <div class="text-center py-8 text-xs text-slate-500 italic">
-                        Histórico vazio nesta sessão. Seus downloads gerados aparecerão aqui!
+                        Nenhum ficheiro criado nesta sessão de navegação.
                     </div>
                 </div>
             </div>
@@ -259,24 +341,25 @@
         </section>
     </main>
 
-    <!-- Simple Footer -->
+    <!-- Rodapé -->
     <footer class="border-t border-slate-900 bg-slate-950/80 py-6 text-center text-xs text-slate-500 mt-auto">
-        <p>© 2026 VozCaster. Powered by Google Gemini. Conversão de texto em fala de alto desempenho.</p>
+        <p>© 2026 VozCaster. Desenvolvido com redes neurais artificiais do Google Gemini. Totalmente livre.</p>
     </footer>
 
     <script>
-        // Constants and State Variables
-        const GOOGLE_API_KEY = ""; // Kept as empty string. Canvas automatically supplies it at runtime.
+        // Chave Padrão (O Canvas pode injetar esta variável automaticamente em tempo de execução)
+        const apiKey = ""; 
         
         let audioHistory = [];
         let activeAudioBlob = null;
         let activeAudioUrl = null;
 
-        // UI DOM Elements
+        // Elementos DOM
         const ttsInput = document.getElementById('tts-input');
         const charCounter = document.getElementById('char-counter');
         const btnClear = document.getElementById('btn-clear');
         const voiceSelect = document.getElementById('voice-select');
+        const langSelect = document.getElementById('lang-select');
         const toneSelect = document.getElementById('tone-select');
         const btnGenerate = document.getElementById('btn-generate');
         
@@ -297,31 +380,100 @@
         const btnClearHistory = document.getElementById('btn-clear-history');
         const toastContainer = document.getElementById('toast-container');
 
-        // Character Counting Functionality
+        // Painel de Configurações
+        const btnToggleSettings = document.getElementById('btn-toggle-settings');
+        const settingsPanel = document.getElementById('settings-panel');
+        const btnCloseSettings = document.getElementById('btn-close-settings');
+        const apiKeyInput = document.getElementById('api-key-input');
+        const btnSaveKey = document.getElementById('btn-save-key');
+        const btnClearKey = document.getElementById('btn-clear-key');
+        const externalKeyWarning = document.getElementById('external-key-warning');
+        const btnSetupNow = document.getElementById('btn-setup-now');
+
+        // Painel de Diagnóstico de Erros
+        const diagnosticPanel = document.getElementById('diagnostic-panel');
+        const errorStatus = document.getElementById('error-status');
+        const errorSource = document.getElementById('error-source');
+        const errorDesc = document.getElementById('error-desc');
+
+        // Verificar o ambiente de alojamento e chaves locais no arranque
+        window.addEventListener('load', () => {
+            const savedKey = localStorage.getItem('voz_caster_api_key');
+            if (savedKey) {
+                apiKeyInput.value = savedKey;
+                btnToggleSettings.innerHTML = `<i class="fa-solid fa-key text-emerald-400"></i> Chave Configurada`;
+            } else {
+                // Se estiver no GitHub Pages ou domínio externo, e não houver chave salva/injetada
+                const isExternal = window.location.hostname !== 'localhost' && !window.location.hostname.includes('googleusercontent.com');
+                const hasDefaultKey = apiKey !== "";
+                
+                if (isExternal && !hasDefaultKey) {
+                    externalKeyWarning.classList.remove('hidden');
+                }
+            }
+        });
+
+        btnToggleSettings.addEventListener('click', () => {
+            settingsPanel.classList.toggle('hidden');
+        });
+
+        btnCloseSettings.addEventListener('click', () => {
+            settingsPanel.classList.add('hidden');
+        });
+
+        btnSetupNow.addEventListener('click', () => {
+            settingsPanel.classList.remove('hidden');
+            settingsPanel.scrollIntoView({ behavior: 'smooth' });
+        });
+
+        btnSaveKey.addEventListener('click', () => {
+            const key = apiKeyInput.value.trim();
+            if (!key) {
+                showToast("Por favor, introduza uma chave válida primeiro.", "warn");
+                return;
+            }
+            localStorage.setItem('voz_caster_api_key', key);
+            btnToggleSettings.innerHTML = `<i class="fa-solid fa-key text-emerald-400"></i> Chave Configurada`;
+            externalKeyWarning.classList.add('hidden');
+            showToast("Chave de API guardada com sucesso!", "success");
+            settingsPanel.classList.add('hidden');
+        });
+
+        btnClearKey.addEventListener('click', () => {
+            apiKeyInput.value = "";
+            localStorage.removeItem('voz_caster_api_key');
+            btnToggleSettings.innerHTML = `<i class="fa-solid fa-key"></i> Chave de API do Google`;
+            
+            const isExternal = window.location.hostname !== 'localhost' && !window.location.hostname.includes('googleusercontent.com');
+            if (isExternal && apiKey === "") {
+                externalKeyWarning.classList.remove('hidden');
+            }
+            showToast("Chave eliminada. A reverter para a configuração base.", "info");
+        });
+
+        // Contagem Dinâmica de Caracteres
         ttsInput.addEventListener('input', () => {
             const currentLen = ttsInput.value.length;
-            charCounter.innerText = `${currentLen} / 5000 caracteres`;
+            charCounter.innerText = `${currentLen} / 8000 caracteres`;
             
-            if (currentLen > 4500) {
+            if (currentLen > 7000) {
                 charCounter.className = 'text-xs text-amber-400 bg-slate-950 px-2.5 py-1 rounded-md border border-amber-500/20';
             } else {
                 charCounter.className = 'text-xs text-slate-400 bg-slate-950 px-2.5 py-1 rounded-md border border-slate-850';
             }
         });
 
-        // Clear textarea action
         btnClear.addEventListener('click', () => {
             ttsInput.value = "";
-            charCounter.innerText = "0 / 5000 caracteres";
+            charCounter.innerText = "0 / 8000 caracteres";
             charCounter.className = 'text-xs text-slate-400 bg-slate-950 px-2.5 py-1 rounded-md border border-slate-850';
-            showToast("Campo de texto limpo", "info");
+            showToast("Campo limpo.", "info");
         });
 
-        // Split text intelligently into smaller chunks to prevent API limits or failures.
-        // Google Gemini TTS handles segments up to a limit easily.
-        // Dividing into chunks of up to 900 characters preserves sentence boundaries.
-        function splitTextIntoSentenceChunks(text, maxChunkSize = 900) {
-            // Match sentence-like segments, keeping punctuation intact
+        /**
+         * Fatiador inteligente de parágrafos e frases que preserva as pontuações e limites do texto.
+         */
+        function splitTextIntoSentenceChunks(text, maxChunkSize = 850) {
             const regex = /[^.!?;\n\r]+[.!?;\n\r]*|[\n\r]+/g;
             const segments = text.match(regex) || [text];
             
@@ -345,7 +497,7 @@
             return chunks;
         }
 
-        // Custom Dynamic Toast Notification System (Replacement for banned 'alert()')
+        // Sistema de Toast Integrado
         function showToast(message, type = "success") {
             const toast = document.createElement('div');
             toast.className = `flex items-center gap-3 p-4 rounded-xl border shadow-lg text-xs font-medium transition duration-500 transform translate-x-12 opacity-0 select-none bg-slate-900 pointer-events-auto`;
@@ -369,27 +521,28 @@
             
             toastContainer.appendChild(toast);
             
-            // Trigger animation
             setTimeout(() => {
                 toast.classList.remove('translate-x-12', 'opacity-0');
             }, 10);
 
-            // Clear after timeout
             setTimeout(() => {
                 toast.classList.add('translate-x-12', 'opacity-0');
                 setTimeout(() => {
                     toast.remove();
                 }, 500);
-            }, 4000);
+            }, 4500);
         }
 
-        // Main Core API Synthesizer Call
-        async function fetchTTSChunkFromGemini(textPrompt, voiceName) {
-            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-tts:generateContent?key=${GOOGLE_API_KEY}`;
+        // Chamada Sequencial com Tratamento Exponencial e Resolução Dinâmica de Chaves
+        async function fetchTTSChunkFromGemini(textPrompt, voiceName, langCode) {
+            const userSavedKey = localStorage.getItem('voz_caster_api_key');
+            const targetKey = userSavedKey ? userSavedKey : apiKey;
+            
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-tts:generateContent?key=${targetKey}`;
             
             const payload = {
                 contents: [{
-                    parts: [{ text: textPrompt }]
+                    parts: [{ text: `[Language: ${langCode}] ${textPrompt}` }]
                 }],
                 generationConfig: {
                     responseModalities: ["AUDIO"],
@@ -398,14 +551,14 @@
                             prebuiltVoiceConfig: { voiceName: voiceName }
                         }
                     }
-                }
+                },
+                model: "gemini-2.5-flash-preview-tts"
             };
 
-            // Implement exponential backoff parameters
-            let retries = 3;
+            let retries = 2;
             let delay = 1000;
 
-            while (retries > 0) {
+            while (retries >= 0) {
                 try {
                     const response = await fetch(apiUrl, {
                         method: 'POST',
@@ -415,7 +568,14 @@
 
                     if (!response.ok) {
                         const errorBody = await response.json().catch(() => ({}));
-                        throw new Error(`API Error: ${response.status} - ${errorBody.error?.message || response.statusText}`);
+                        const errMsg = errorBody.error?.message || response.statusText;
+                        const errCode = response.status;
+                        
+                        throw { 
+                            status: errCode, 
+                            source: userSavedKey ? "Chave Pessoal Definida (Local)" : "Configuração Sem Chave (GitHub Pages)", 
+                            message: errMsg 
+                        };
                     }
 
                     const result = await response.json();
@@ -424,10 +584,13 @@
                     const mimeType = candidatePart?.inlineData?.mimeType;
 
                     if (!audioData) {
-                        throw new Error("Formato de resposta inesperado da API de fala.");
+                        throw { 
+                            status: "Dados em Falha", 
+                            source: "Processamento Gemini", 
+                            message: "A rede não conseguiu devolver os bytes de som binários corretos." 
+                        };
                     }
 
-                    // Extract the sample rate from mimetype if present, defaults to 24000 for Gemini TTS
                     let sampleRate = 24000;
                     if (mimeType) {
                         const match = mimeType.match(/rate=(\d+)/);
@@ -437,16 +600,15 @@
                     return { audioData, sampleRate };
 
                 } catch (error) {
-                    retries--;
                     if (retries === 0) throw error;
-                    // Exponential backoff delay
+                    retries--;
                     await new Promise(resolve => setTimeout(resolve, delay));
                     delay *= 2;
                 }
             }
         }
 
-        // Utility: Convert Base64 string to a standard ArrayBuffer
+        // Descodificador Base64 para ArrayBuffer
         function base64ToArrayBuffer(base64) {
             const binaryString = atob(base64);
             const len = binaryString.length;
@@ -457,7 +619,7 @@
             return bytes.buffer;
         }
 
-        // Utility: Merge multiple raw Int16Arrays (PCM arrays) together sequential
+        // Fusão Sequencial de Arrays Binários
         function mergeInt16Arrays(arrays) {
             let totalLength = 0;
             for (const arr of arrays) {
@@ -472,39 +634,25 @@
             return merged;
         }
 
-        // Convert raw PCM 16-bit audio data into a playable, downloadable WAV file
+        // Converte e encapsula dados PCM 16 bits para protocolo oficial WAV
         function pcmToWav(pcm16Array, sampleRate) {
             const buffer = new ArrayBuffer(44 + pcm16Array.byteLength);
             const view = new DataView(buffer);
             
-            /* RIFF identifier */
             writeString(view, 0, 'RIFF');
-            /* file length */
             view.setUint32(4, 36 + pcm16Array.byteLength, true);
-            /* RIFF type */
             writeString(view, 8, 'WAVE');
-            /* format chunk identifier */
             writeString(view, 12, 'fmt ');
-            /* format chunk length */
             view.setUint32(16, 16, true);
-            /* sample format (raw PCM16 = 1) */
-            view.setUint16(20, 1, true);
-            /* channel count (Mono = 1) */
-            view.setUint16(22, 1, true);
-            /* sample rate */
+            view.setUint16(20, 1, true); // Formato PCM (1)
+            view.setUint16(22, 1, true); // Canal Mono (1)
             view.setUint32(24, sampleRate, true);
-            /* byte rate = sampleRate * channels * bytesPerSample */
-            view.setUint32(28, sampleRate * 1 * 2, true);
-            /* block align = channels * bytesPerSample */
-            view.setUint16(32, 2, true);
-            /* bits per sample */
-            view.setUint16(34, 16, true);
-            /* data chunk identifier */
+            view.setUint32(28, sampleRate * 1 * 2, true); // Velocidade de bytes
+            view.setUint16(32, 2, true); // Alinhamento de blocos
+            view.setUint16(34, 16, true); // Bits por Amostra (16)
             writeString(view, 36, 'data');
-            /* data chunk length */
             view.setUint32(40, pcm16Array.byteLength, true);
 
-            // Write actual signed PCM 16-bit audio samples
             for (let i = 0; i < pcm16Array.length; i++) {
                 view.setInt16(44 + i * 2, pcm16Array[i], true);
             }
@@ -518,25 +666,28 @@
             }
         }
 
-        // Helper to format date timestamps
         function formatTimestamp() {
             const now = new Date();
             const pad = (n) => n.toString().padStart(2, '0');
-            return `${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
+            return `${pad(now.getHours())}h${pad(now.getMinutes())}m${pad(now.getSeconds())}s`;
         }
 
-        // Main Execution Handler
+        // Desencadeador de Construção de Fala
         btnGenerate.addEventListener('click', async () => {
             const rawText = ttsInput.value.trim();
             if (!rawText) {
-                showToast("Por favor, digite algum texto primeiro.", "warn");
+                showToast("Por favor, introduza algum texto primeiro.", "warn");
                 return;
             }
 
             const chosenVoice = voiceSelect.value;
             const chosenToneInstruction = toneSelect.value;
+            const chosenLang = langSelect.value;
 
-            // Transition UI into loading state
+            // Limpar erros de diagnóstico anteriores
+            diagnosticPanel.classList.add('hidden');
+            
+            // Ativar estados de Loading
             btnGenerate.disabled = true;
             btnGenerate.classList.add('opacity-50', 'cursor-not-allowed');
             
@@ -544,64 +695,61 @@
             activePlayerContainer.classList.add('hidden');
             loaderPanel.classList.remove('hidden');
             
-            loaderProgressText.innerText = "Analisando estrutura de texto...";
+            loaderProgressText.innerText = "A analisar estrutura gramatical...";
             loaderProgressBar.style.width = '10%';
 
             try {
-                // Split text into chunks
                 const chunks = splitTextIntoSentenceChunks(rawText);
                 const totalChunks = chunks.length;
                 const pcmArrays = [];
-                let outputSampleRate = 24000; // default initial fallback
+                let outputSampleRate = 24000;
 
                 for (let idx = 0; idx < totalChunks; idx++) {
                     const chunkNum = idx + 1;
-                    loaderProgressText.innerText = `Processando parte ${chunkNum} de ${totalChunks}...`;
+                    loaderProgressText.innerText = `A renderizar áudio: bloco ${chunkNum} de ${totalChunks}...`;
                     const percentComplete = Math.floor(10 + (chunkNum / totalChunks) * 80);
                     loaderProgressBar.style.width = `${percentComplete}%`;
 
-                    // Formulate full prompt command including style / tone if requested
                     const textWithTone = `${chosenToneInstruction} ${chunks[idx]}`;
                     
-                    // Fetch from Google Gemini API
-                    const resultData = await fetchTTSChunkFromGemini(textWithTone, chosenVoice);
+                    // Pedido Sequencial à API do Google Gemini
+                    const resultData = await fetchTTSChunkFromGemini(textWithTone, chosenVoice, chosenLang);
                     outputSampleRate = resultData.sampleRate;
 
-                    // Decompress/convert base64 chunk to ArrayBuffer
                     const arrayBuffer = base64ToArrayBuffer(resultData.audioData);
                     const pcm16 = new Int16Array(arrayBuffer);
                     pcmArrays.push(pcm16);
                 }
 
-                // Compile all chunks together
-                loaderProgressText.innerText = "Unificando faixas de som...";
+                // Junção sequencial final
+                loaderProgressText.innerText = "A unificar trilhos de som...";
                 loaderProgressBar.style.width = '95%';
                 
                 const mergedPCM = mergeInt16Arrays(pcmArrays);
                 const wavBlob = pcmToWav(mergedPCM, outputSampleRate);
 
-                // Build Blob resource URL
                 if (activeAudioUrl) {
-                    URL.revokeObjectURL(activeAudioUrl); // free memory
+                    URL.revokeObjectURL(activeAudioUrl);
                 }
                 activeAudioBlob = wavBlob;
                 activeAudioUrl = URL.createObjectURL(wavBlob);
 
-                // Play Audio in player
+                // Configurar elementos de reprodução
                 mainAudioElement.src = activeAudioUrl;
-                playerTitle.innerText = `audio_fala_${chosenVoice}_${formatTimestamp().replace(/:/g, '-')}.wav`;
+                playerTitle.innerText = `voz_${chosenVoice}_${formatTimestamp()}.wav`;
                 
-                // Formulate duration approximation
                 const totalSeconds = Math.round(mergedPCM.length / outputSampleRate);
-                const formattedDuration = `${Math.floor(totalSeconds / 60)}m ${totalSeconds % 60}s`;
-                playerMeta.innerText = `Voz: ${chosenVoice} • Duração est.: ${formattedDuration} • WAV`;
+                const minutesPart = Math.floor(totalSeconds / 60);
+                const secondsPart = totalSeconds % 60;
+                const formattedDuration = `${minutesPart}m ${secondsPart.toString().padStart(2, '0')}s`;
+                playerMeta.innerText = `Voz: ${chosenVoice} • Idioma: ${chosenLang} • Duração: ${formattedDuration}`;
 
-                // Update UI state to active player
+                // Mostrar player finalizado
                 loaderPanel.classList.add('hidden');
                 activePlayerContainer.classList.remove('hidden');
-                showToast("Áudio sintetizado com sucesso!", "success");
+                showToast("Locução completa estruturada!", "success");
 
-                // Add to History list
+                // Inserir no histórico
                 addToHistoryList({
                     id: Date.now(),
                     title: playerTitle.innerText,
@@ -612,17 +760,24 @@
                 });
 
             } catch (err) {
-                console.error(err);
+                console.error("Erro na conversão de fala:", err);
                 loaderPanel.classList.add('hidden');
                 playerPlaceholder.classList.remove('hidden');
-                showToast(err.message || "Houve uma falha ao sintetizar o áudio.", "error");
+                
+                // Ativar e popular painel de erros técnicos detalhado
+                diagnosticPanel.classList.remove('hidden');
+                errorStatus.innerText = err.status || "Bloqueado / Rede";
+                errorSource.innerText = err.source || "Ligação ao Host Externo";
+                errorDesc.innerText = err.message || "Pedido bloqueado devido à falta de credenciais (Chave de API em falta ou inválida fora do Canvas).";
+                
+                showToast("Erro ao processar. Verifique o diagnóstico abaixo.", "error");
             } finally {
                 btnGenerate.disabled = false;
                 btnGenerate.classList.remove('opacity-50', 'cursor-not-allowed');
             }
         });
 
-        // Downloader action hook
+        // Eventos diretos de download do player ativo
         btnDownloadActive.addEventListener('click', () => {
             if (!activeAudioUrl) return;
             const a = document.createElement('a');
@@ -631,14 +786,11 @@
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
-            showToast("Iniciando download do seu áudio!", "success");
+            showToast("Descarregamento iniciado com sucesso!", "success");
         });
 
-        // Copy link action hook
         btnShareActive.addEventListener('click', () => {
             if (!activeAudioUrl) return;
-            
-            // In typical iFrame configurations navigator.clipboard can fail, fallback to execCommand
             try {
                 const tempInput = document.createElement('input');
                 tempInput.value = window.location.href;
@@ -646,15 +798,15 @@
                 tempInput.select();
                 document.execCommand('copy');
                 document.body.removeChild(tempInput);
-                showToast("Link do aplicativo copiado!", "info");
+                showToast("Endereço do VozCaster copiado para partilha!", "info");
             } catch (err) {
                 showToast("Não foi possível copiar automaticamente.", "warn");
             }
         });
 
-        // History Management Core
+        // Controlo do Histórico
         function addToHistoryList(item) {
-            audioHistory.unshift(item); // insert at start
+            audioHistory.unshift(item);
             renderHistory();
         }
 
@@ -662,7 +814,7 @@
             if (audioHistory.length === 0) {
                 historyContainer.innerHTML = `
                     <div class="text-center py-8 text-xs text-slate-500 italic">
-                        Histórico vazio nesta sessão. Seus downloads gerados aparecerão aqui!
+                        Nenhum ficheiro criado nesta sessão de navegação.
                     </div>
                 `;
                 return;
@@ -681,18 +833,16 @@
                         </div>
                     </div>
                     <div class="flex items-center gap-2">
-                        <button class="btn-play-history p-2 rounded bg-slate-900 hover:bg-slate-850 border border-slate-800 text-indigo-400 hover:text-indigo-300 transition" title="Escutar no player">
+                        <button class="btn-play-history p-2 rounded bg-slate-900 hover:bg-slate-850 border border-slate-800 text-indigo-400 hover:text-indigo-300 transition" title="Carregar no leitor">
                             <i class="fa-solid fa-play"></i>
                         </button>
-                        <button class="btn-dl-history p-2 rounded bg-slate-900 hover:bg-slate-850 border border-slate-800 text-slate-300 hover:text-white transition" title="Download">
+                        <button class="btn-dl-history p-2 rounded bg-slate-900 hover:bg-slate-850 border border-slate-800 text-slate-300 hover:text-white transition" title="Fazer Download">
                             <i class="fa-solid fa-download"></i>
                         </button>
                     </div>
                 `;
 
-                // Set actions
                 div.querySelector('.btn-play-history').addEventListener('click', () => {
-                    // Update active player
                     if (activeAudioUrl) {
                         URL.revokeObjectURL(activeAudioUrl);
                     }
@@ -701,13 +851,13 @@
                     
                     mainAudioElement.src = activeAudioUrl;
                     playerTitle.innerText = item.title;
-                    playerMeta.innerText = `Voz: ${item.voice} • Duração: ${item.duration} • WAV`;
+                    playerMeta.innerText = `Voz: ${item.voice} • Duração: ${item.duration}`;
                     
                     playerPlaceholder.classList.add('hidden');
                     activePlayerContainer.classList.remove('hidden');
                     
                     mainAudioElement.play();
-                    showToast("Áudio carregado no player!", "info");
+                    showToast("Ficheiro carregado no leitor ativo!", "info");
                 });
 
                 div.querySelector('.btn-dl-history').addEventListener('click', () => {
@@ -719,28 +869,26 @@
                     a.click();
                     document.body.removeChild(a);
                     URL.revokeObjectURL(tempUrl);
-                    showToast("Iniciando download!", "success");
+                    showToast("A descarregar ficheiro!", "success");
                 });
 
                 historyContainer.appendChild(div);
             });
         }
 
-        // Clear all history list
         btnClearHistory.addEventListener('click', () => {
             if (audioHistory.length === 0) return;
             audioHistory = [];
             renderHistory();
-            showToast("Histórico limpo com sucesso.", "info");
+            showToast("Histórico limpo.", "info");
         });
 
-        // Waveform Animation Link to Audio Playback State
+        // Simulação Dinâmica da Onda Sonora em sincronia com o Evento Play
         const waveBars = document.querySelectorAll('.wave-bar');
         let animationInterval = null;
 
         function animateWaveform() {
             waveBars.forEach(bar => {
-                // Generate relative high / low frequencies dynamic
                 const randomHeight = Math.floor(Math.random() * 32) + 4;
                 bar.style.height = `${randomHeight}px`;
             });
